@@ -1,23 +1,46 @@
 create or replace
-view safv.existencia as
+view psk_pf.existencia as
 select
-	a.agencia,
-	a.codigo ,
+	e.almacen ,
+	a.codigo,
 	g.nombre as grupo ,
-	sg.nombre  as subgrupo ,
-	a.nombre ,
+	sg.nombre as subgrupo ,
+	controlado ,
+	case
+		when trim(A.detalles) = '' then a.nombre
+		else A.detalles
+	end as nombre ,
 	referencia ,
 	marca,
-	existencia,
-	preciofin1,
-	a.discont 
+	a.hashtag as etiquetas,
+	a.contraindi as descripcion,
+	campo1 as principio,
+	coalesce (e.existencia,
+	0) existencia,
+	preciofin1 as precio,
+	a.discont as descontinuado,
+	a.codigotipoprod as destacado,
+	' ' as descuento,
+	I.codalternativo as barras,
+	case
+	when campo10!=0
+	then round((campo9/campo10) *(1+(trim(campo2)/100 )),2)
+	else 0
+	end as precio2,
+	' ' as descuento2
 from
-	backup.articulo a
-join backup.grupos g on
+	adminpurofm.articulo a
+left join adminpurofm.existenc e on
+	e.codigo = a.codigo
+left join adminpurofm.grupos g on
 	g.codigo = a.grupo
-	and g.agencia = a.agencia
-join backup.subgrupos sg on
+left join adminpurofm.subgrupos sg on
 	a.subgrupo = sg.subcodigo
-	
 	and a.grupo = sg.codigo
-	and sg.agencia = a.agencia
+left join adminpurofm.invcodalternativo i on
+	I.codigo = A.codigo
+	and I.agencia = 'CDB'
+
+
+	
+	
