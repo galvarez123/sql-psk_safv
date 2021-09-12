@@ -21,13 +21,22 @@ select
 	a.discont as descontinuado,
 	a.codigotipoprod as destacado,
 	' ' as descuento,
-	I.codalternativo as barras,
+	codigodebarras.codalternativo as barras,
 	case
 	when campo10!=0
 	then round((campo9/campo10) *(1+(trim(campo2)/100 )),2)
 	else 0
 	end as precio2,
-	' ' as descuento2
+	' ' as descuento2	,
+	case
+		when trim(a.impuesto1) >0 then "imponible"
+		else "ninguno"
+	end as situacion_fiscal ,
+	case
+		when trim(a.impuesto1) >0 then " "
+		else "exento"
+	end as clase_impuesto ,
+	(precio1 *(trim(a.impuesto1)/100 )) as impuesto
 from
 	adminpurofm.articulo a
 left join adminpurofm.existenc e on
@@ -37,10 +46,11 @@ left join adminpurofm.grupos g on
 left join adminpurofm.subgrupos sg on
 	a.subgrupo = sg.subcodigo
 	and a.grupo = sg.codigo
-left join adminpurofm.invcodalternativo i on
-	I.codigo = A.codigo
-	and I.agencia = 'CDB'
-
+left join    (select max(i.codalternativo) as codalternativo, codigo 
+    from adminpurofm.invcodalternativo i where 	i.agencia = 'cdb'
+	group by i.codigo
+   ) codigodebarras 
+   on codigodebarras.codigo=a.codigo
 
 	
 	
